@@ -97,7 +97,7 @@ It is not only a chatbot. It is designed as a workflow-oriented AI support platf
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#ffffff", "primaryTextColor": "#0f172a", "lineColor": "#94a3b8", "clusterBkg": "#f8fafc", "clusterBorder": "#dbe3ee", "tertiaryColor": "#f8fafc"}} }%%
-flowchart TB
+flowchart LR
     classDef entry fill:#ecfeff,stroke:#0891b2,color:#164e63,stroke-width:1.6px
     classDef gateway fill:#eff6ff,stroke:#2563eb,color:#1e3a8a,stroke-width:1.8px
     classDef core fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
@@ -106,39 +106,39 @@ flowchart TB
     classDef data fill:#f8fafc,stroke:#475569,color:#0f172a,stroke-width:1.6px
     classDef loop fill:#f0fdf4,stroke:#16a34a,color:#14532d,stroke-width:1.8px
 
-    subgraph L1["体验入口 Experience"]
-        direction LR
+    subgraph L1["01 体验入口 Experience"]
+        direction TB
         Student["学生端<br/>对话 · 情绪日记 · 小任务 · 历史会话"]:::entry
         Voice["语音陪伴<br/>LiveKit · ASR · TTS · 可打断"]:::entry
         Admin["管理端<br/>风险看板 · 个案档案 · 知识运营"]:::entry
     end
 
-    Gateway["统一接入层<br/>Spring Boot WebFlux · SSE Streaming · Auth · Voice Session"]:::gateway
+    Gateway["02 统一接入层<br/>Spring Boot WebFlux<br/>SSE Streaming · Auth · Voice Session"]:::gateway
 
-    subgraph L2["智能支持中枢 Care Intelligence Hub"]
-        direction LR
+    subgraph L2["03 智能支持中枢 Care Intelligence Hub"]
+        direction TB
         Orchestrator["意图编排<br/>Chat / Consult / Crisis / Knowledge"]:::core
         Memory["长期支持记忆<br/>目标 · 摘要 · 学生画像"]:::loop
         Safety["安全策略<br/>风险门控 · 危机流程 · 人工转介"]:::risk
     end
 
-    subgraph L3["AI 能力中心 AI Capabilities"]
-        direction LR
+    subgraph L3["04 AI 能力中心 AI Capabilities"]
+        direction TB
         LLM["流式大模型<br/>Qwen / OpenAI-compatible"]:::core
         RAG["可信 RAG<br/>引用 · 分类 · 证据 · 反馈"]:::core
         Fusion["多模态融合<br/>文本风险 · 语音情绪 · 图像置信度"]:::risk
         VoiceAI["语音引擎<br/>Doubao ASR · Doubao/MiniMax TTS"]:::core
     end
 
-    subgraph L4["业务闭环 Care Operations"]
-        direction LR
+    subgraph L4["05 业务闭环 Care Operations"]
+        direction TB
         Profile["学生支持档案<br/>趋势 · 任务完成率 · 管理员备注"]:::care
         Ticket["危机干预工单<br/>SLA · 联系记录 · 时间线 · 结案"]:::risk
         Knowledge["知识库运营<br/>版本 · 禁用 · 检索测试 · 反馈"]:::care
     end
 
-    subgraph L5["数据底座 Data Foundation"]
-        direction LR
+    subgraph L5["06 数据底座 Data Foundation"]
+        direction TB
         DB["MySQL / H2<br/>用户 · 会话 · 工单 · 审计"]:::data
         Vector["Chroma<br/>知识切片 · 向量检索"]:::data
         Cache["Redis<br/>状态缓存 · SLA 计时"]:::data
@@ -148,10 +148,9 @@ flowchart TB
     L1 --> Gateway
     Gateway --> L2
     L2 --> L3
-    L2 --> L4
-    L3 --> L5
+    L3 --> L4
     L4 --> L5
-    L5 -. 支持上下文与处置结果回流 .-> L2
+    L5 -. 学生画像 · 知识证据 · 处置结果回流 .-> L2
 ```
 
 ---
