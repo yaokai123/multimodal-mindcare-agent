@@ -96,92 +96,62 @@ It is not only a chatbot. It is designed as a workflow-oriented AI support platf
 ## 系统架构 | Architecture
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#ffffff", "primaryTextColor": "#0f172a", "lineColor": "#64748b", "clusterBkg": "#f8fafc", "clusterBorder": "#cbd5e1"}} }%%
-flowchart LR
-    classDef entry fill:#ecfeff,stroke:#0891b2,color:#164e63,stroke-width:1.8px
-    classDef app fill:#eff6ff,stroke:#2563eb,color:#1e3a8a,stroke-width:1.8px
-    classDef ai fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95,stroke-width:1.8px
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#ffffff", "primaryTextColor": "#0f172a", "lineColor": "#94a3b8", "clusterBkg": "#f8fafc", "clusterBorder": "#dbe3ee", "tertiaryColor": "#f8fafc"}} }%%
+flowchart TB
+    classDef entry fill:#ecfeff,stroke:#0891b2,color:#164e63,stroke-width:1.6px
+    classDef gateway fill:#eff6ff,stroke:#2563eb,color:#1e3a8a,stroke-width:1.8px
+    classDef core fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef care fill:#fff7ed,stroke:#ea580c,color:#7c2d12,stroke-width:1.6px
     classDef risk fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.8px
-    classDef ops fill:#fff7ed,stroke:#ea580c,color:#7c2d12,stroke-width:1.8px
-    classDef data fill:#f8fafc,stroke:#475569,color:#0f172a,stroke-width:1.8px
+    classDef data fill:#f8fafc,stroke:#475569,color:#0f172a,stroke-width:1.6px
     classDef loop fill:#f0fdf4,stroke:#16a34a,color:#14532d,stroke-width:1.8px
 
-    subgraph C1["01 体验入口 / Experience"]
-        direction TB
-        Web["学生端<br/>Chat · Mood Journal · Tiny Tasks"]:::entry
-        Voice["实时语音端<br/>LiveKit · Interruptible Voice"]:::entry
-        Admin["管理员工作台<br/>Risk Board · Case File · Knowledge Ops"]:::entry
+    subgraph L1["体验入口 Experience"]
+        direction LR
+        Student["学生端<br/>对话 · 情绪日记 · 小任务 · 历史会话"]:::entry
+        Voice["语音陪伴<br/>LiveKit · ASR · TTS · 可打断"]:::entry
+        Admin["管理端<br/>风险看板 · 个案档案 · 知识运营"]:::entry
     end
 
-    subgraph C2["02 统一接入 / API Gateway"]
-        direction TB
-        Stream["SSE Chat API<br/>Text · Image · Audio · Video"]:::app
-        VoiceCtrl["Voice Control API<br/>Room · Token · Session · Metrics"]:::app
-        Support["Support API<br/>Goals · Mood Trend · Task Recommendation"]:::app
-        AdminApi["Admin API<br/>Ticket State · Timeline · Audit · Export"]:::app
+    Gateway["统一接入层<br/>Spring Boot WebFlux · SSE Streaming · Auth · Voice Session"]:::gateway
+
+    subgraph L2["智能支持中枢 Care Intelligence Hub"]
+        direction LR
+        Orchestrator["意图编排<br/>Chat / Consult / Crisis / Knowledge"]:::core
+        Memory["长期支持记忆<br/>目标 · 摘要 · 学生画像"]:::loop
+        Safety["安全策略<br/>风险门控 · 危机流程 · 人工转介"]:::risk
     end
 
-    subgraph C3["03 智能编排 / Agent Orchestration"]
-        direction TB
-        Router["Intent Router<br/>Chat / Consult / Crisis / Knowledge"]:::ai
-        Memory["Long-term Support Memory<br/>Goals · Summaries · Student Profile"]:::loop
-        Policy["Safety Policy Engine<br/>Risk Gate · Crisis Protocol · Human Handoff"]:::risk
+    subgraph L3["AI 能力中心 AI Capabilities"]
+        direction LR
+        LLM["流式大模型<br/>Qwen / OpenAI-compatible"]:::core
+        RAG["可信 RAG<br/>引用 · 分类 · 证据 · 反馈"]:::core
+        Fusion["多模态融合<br/>文本风险 · 语音情绪 · 图像置信度"]:::risk
+        VoiceAI["语音引擎<br/>Doubao ASR · Doubao/MiniMax TTS"]:::core
     end
 
-    subgraph C4["04 模型与工具 / Models & Tools"]
-        direction TB
-        LLM["Qwen / OpenAI-compatible LLM<br/>Streaming Response"]:::ai
-        RAG["Agentic RAG<br/>Citation · Category · Evidence · Feedback"]:::ai
-        Multi["Multimodal Risk Fusion<br/>Text · Voice Emotion · Visual Confidence"]:::risk
-        ASR["Doubao ASR<br/>Realtime Transcription"]:::ai
-        TTS["Doubao / MiniMax TTS<br/>Calm · Brief · Formal Voice"]:::ai
+    subgraph L4["业务闭环 Care Operations"]
+        direction LR
+        Profile["学生支持档案<br/>趋势 · 任务完成率 · 管理员备注"]:::care
+        Ticket["危机干预工单<br/>SLA · 联系记录 · 时间线 · 结案"]:::risk
+        Knowledge["知识库运营<br/>版本 · 禁用 · 检索测试 · 反馈"]:::care
     end
 
-    subgraph C5["05 数据与运营 / Data & Operations"]
-        direction TB
-        DB["MySQL / H2<br/>Users · Sessions · Cases · Audit Logs"]:::data
-        Vector["Chroma Vector Store<br/>Knowledge Chunks · Similarity Search"]:::data
-        Cache["Redis<br/>Runtime State · SLA Timer"]:::data
-        Notify["Mail / Webhook<br/>SLA Alert · Escalation Notice"]:::ops
-        Files["CSV / Excel Export<br/>Reports · Intervention Records"]:::ops
+    subgraph L5["数据底座 Data Foundation"]
+        direction LR
+        DB["MySQL / H2<br/>用户 · 会话 · 工单 · 审计"]:::data
+        Vector["Chroma<br/>知识切片 · 向量检索"]:::data
+        Cache["Redis<br/>状态缓存 · SLA 计时"]:::data
+        Notify["Mail / Webhook / CSV<br/>提醒 · 导出 · 报告"]:::data
     end
 
-    Web --> Stream
-    Web --> Support
-    Voice --> VoiceCtrl
-    Admin --> AdminApi
-    Admin --> Support
-
-    Stream --> Router
-    VoiceCtrl --> ASR
-    ASR --> Router
-    Support --> Memory
-    AdminApi --> Policy
-
-    Router --> Memory
-    Router --> RAG
-    Router --> LLM
-    Router --> Multi
-    Multi --> Policy
-    Policy --> AdminApi
-
-    RAG --> Vector
-    LLM --> Stream
-    TTS --> Voice
-    LLM --> TTS
-
-    Memory --> DB
-    AdminApi --> DB
-    AdminApi --> Notify
-    AdminApi --> Files
-    Policy --> Cache
-    Stream --> DB
-    VoiceCtrl --> Cache
-
-    DB -. student profile / support context .-> Memory
-    Vector -. grounded evidence .-> RAG
-    Notify -. response reminder .-> Admin
-    AdminApi -. case outcome .-> Memory
+    L1 --> Gateway
+    Gateway --> L2
+    L2 --> L3
+    L2 --> L4
+    L3 --> L5
+    L4 --> L5
+    L5 -. 支持上下文与处置结果回流 .-> L2
 ```
 
 ---
