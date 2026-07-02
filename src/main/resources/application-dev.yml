@@ -1,0 +1,17 @@
+spring:
+  h2:
+    console:
+      enabled: true
+
+multimodal-agent:
+  security:
+    seed-demo-users: true
+    admin-password: ${MULTIMODAL_AGENT_ADMIN_PASSWORD:admin123456789}
+    student-password: ${MULTIMODAL_AGENT_STUDENT_PASSWORD:student123456}
+  mcp:
+    server:
+      enabled: ${MCP_SERVER_ENABLED:false}
+      auth-token: ${MCP_SERVER_TOKEN:}
+  multimodal:
+    whisper:
+      demo-filename-signals: ${WHISPER_DEMO_FILENAME_SIGNALS:true}

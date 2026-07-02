@@ -1,0 +1,16 @@
+target/
+.m2/
+.tools/
+.idea/
+.vscode/
+*.iml
+.env
+data/
+logs/
+.DS_Store
+*.log
+scripts/start-voice-dev.ps1
+*.gguf
+*.gguf.zip
+mindbridge-qwen2.5-7b-ft-q4_k_m.gguf/
+mindbridge-qwen2.5-7b-ft-q4_k_m.gguf.zip

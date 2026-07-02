@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>多模态智心 Agent</title>
+  <link rel="stylesheet" href="styles.css?v=20260630-rendered-state-rebuild">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="identity">
+        <div class="logo-mark">心</div>
+        <div>
+          <p class="kicker">Multimodal MindCare Agent</p>
+          <h1>多模态智心</h1>
+        </div>
+      </div>
+      <div class="top-status">
+        <span id="serviceState" class="status-dot">连接中</span>
+        <span id="modelState" class="status-dot">模型读取中</span>
+      </div>
+      <form id="loginForm" class="login-strip">
+        <input id="username" name="username" value="student" autocomplete="username" aria-label="账号">
+        <input id="password" name="password" placeholder="输入已配置的密码" type="password" autocomplete="current-password" aria-label="密码">
+        <button type="submit">进入</button>
+        <p id="loginState">使用 .env 中配置的账号密码</p>
+      </form>
+      <section id="accountPanel" class="account-strip" hidden>
+        <div>
+          <strong id="activeAccount">已登录</strong>
+          <span id="activeRole">学生账号</span>
+        </div>
+        <button id="switchAccount" type="button">切换</button>
+      </section>
+    </header>
+
+    <div class="enterprise-frame">
+      <aside class="side-rail" aria-label="产品导航">
+        <nav class="rail-nav">
+          <a class="active" href="#studentView">
+            <span>01</span>
+            <strong>学生支持</strong>
+          </a>
+          <a href="#adminView">
+            <span>02</span>
+            <strong>风险看板</strong>
+          </a>
+          <a href="#knowledgeSources">
+            <span>03</span>
+            <strong>知识运营</strong>
+          </a>
+          <a href="#detailOverlay">
+            <span>04</span>
+            <strong>个案档案</strong>
+          </a>
+        </nav>
+        <section class="rail-card">
+          <p class="kicker">Workspace</p>
+          <strong>Campus Care Console</strong>
+          <span>chat / risk / knowledge / audit</span>
+        </section>
+      </aside>
+
+    <section id="studentView" class="student-console">
+      <aside class="sensor-deck">
+        <section class="glass-panel intake-card">
+          <p class="kicker">Intake</p>
+          <h2>多模态输入</h2>
+          <form id="chatForm" class="intake-form">
+            <textarea id="messageInput" rows="8" placeholder="写下你现在想说的话"></textarea>
+            <div class="sensor-grid">
+              <label class="sensor-tile">
+                <input id="audioInput" type="file" accept="audio/*">
+                <span>Whisper</span>
+                <strong>语音</strong>
+              </label>
+              <label class="sensor-tile">
+                <input id="imageInput" type="file" accept="image/*">
+                <span>MediaPipe</span>
+                <strong>图像</strong>
+              </label>
+              <label class="sensor-tile">
+                <input id="videoInput" type="file" accept="video/*">
+                <span>Face Mesh</span>
+                <strong>视频</strong>
+              </label>
+            </div>
+            <div id="attachmentState" class="attachment-tray">暂无附件</div>
+            <div class="form-actions">
+              <button id="clearAttachments" type="button" class="secondary" hidden>清空附件</button>
+              <button id="newSessionButton" type="button" class="secondary">新会话</button>
+              <button id="sendButton" type="submit" class="primary">发送</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="glass-panel sample-card">
+          <p class="kicker">Quick Signal</p>
+          <div class="sample-list">
+            <button type="button" data-prompt="我最近压力很大，晚上总是睡不着，想先把原因说清楚。">焦虑倾诉</button>
+            <button type="button" data-prompt="这周一直很低落，做什么都提不起劲。">低落陪伴</button>
+            <button type="button" data-prompt="帮我把今晚的复习任务拆成一个具体计划。">普通聊天</button>
+          </div>
+        </section>
+        <section class="glass-panel support-card">
+          <p class="kicker">Mood Journal</p>
+          <h2>情绪日记</h2>
+          <form id="moodForm" class="support-form">
+            <div id="moodScale" class="mood-scale">
+              <button type="button" data-score="1">1</button>
+              <button type="button" data-score="2">2</button>
+              <button type="button" data-score="3" class="active">3</button>
+              <button type="button" data-score="4">4</button>
+              <button type="button" data-score="5">5</button>
+            </div>
+            <input id="moodLabel" value="平稳" maxlength="80" aria-label="情绪标签">
+            <input id="moodTrigger" placeholder="触发因素（可选）" maxlength="120" aria-label="触发因素">
+            <textarea id="moodNote" rows="3" placeholder="简单写下现在的感受"></textarea>
+            <button type="submit" class="primary">记录</button>
+          </form>
+          <div id="moodTrendSummary" class="support-insight"></div>
+          <div id="moodTrendChart" class="trend-chart"></div>
+          <div id="triggerRows" class="support-list compact"></div>
+          <div id="moodRows" class="support-list"></div>
+        </section>
+
+        <section class="glass-panel support-card">
+          <p class="kicker">Tiny Tasks</p>
+          <h2>今日小任务</h2>
+          <form id="taskForm" class="support-form">
+            <input id="taskTitle" placeholder="添加一个可完成的小任务" maxlength="160" aria-label="小任务">
+            <input id="taskDetail" placeholder="细节（可选）" maxlength="2000" aria-label="任务细节">
+            <div class="form-actions two">
+              <button id="seedTasks" type="button" class="secondary">生成建议</button>
+              <button type="submit" class="primary">添加</button>
+            </div>
+          </form>
+          <div id="taskInsight" class="support-insight"></div>
+          <div id="taskRows" class="support-list"></div>
+        </section>
+      </aside>
+
+      <section class="dialog-stage">
+        <div class="stage-head">
+          <div>
+            <p class="kicker">Streaming Console</p>
+            <h2 id="profileText">学生对话</h2>
+          </div>
+          <div id="sessionBadge" class="session-chip">READY</div>
+        </div>
+        <section id="voicePanel" class="voice-panel">
+          <div class="voice-copy">
+            <p class="kicker">Realtime Voice</p>
+            <h3>实时语音陪伴</h3>
+            <span id="voiceState">读取语音配置中</span>
+          </div>
+          <div id="voiceRuntime" class="voice-runtime"></div>
+          <div class="voice-tuning">
+            <label>
+              <span>知识范围</span>
+              <select id="voiceKnowledgeScope">
+                <option value="ALL">全部知识库</option>
+                <option value="CRISIS_POLICY">危机干预</option>
+                <option value="SLEEP_SUPPORT">睡眠支持</option>
+                <option value="STUDY_STRESS">考试压力</option>
+                <option value="CAMPUS_SUPPORT">校内支持</option>
+              </select>
+            </label>
+            <div id="voiceLatency" class="voice-latency">ASR - / LLM - / TTS -</div>
+          </div>
+          <div class="voice-actions">
+            <button id="startVoiceButton" type="button">开始语音</button>
+            <button id="interruptVoiceButton" type="button" class="secondary" disabled>打断播放</button>
+            <button id="endVoiceButton" type="button" class="secondary" disabled>结束</button>
+          </div>
+        </section>
+        <div id="messages" class="message-stream" aria-live="polite"></div>
+      </section>
+
+      <aside class="pipeline-panel">
+        <section class="glass-panel pipeline-card">
+          <p class="kicker">Agent Loop</p>
+          <h2>本轮链路</h2>
+          <div id="pipelineSteps" class="pipeline-steps"></div>
+        </section>
+        <section class="glass-panel model-card">
+          <p class="kicker">Runtime</p>
+          <dl>
+            <div><dt>模型</dt><dd id="runtimeModel">读取中</dd></div>
+            <div><dt>向量库</dt><dd>Chroma / 本地召回</dd></div>
+            <div><dt>工具</dt><dd>Excel + 邮件预警</dd></div>
+          </dl>
+        </section>
+      </aside>
+    </section>
+
+    <section id="adminView" class="admin-console" hidden>
+      <header class="admin-head">
+        <div>
+          <p class="kicker">Counselor Workbench</p>
+          <h2>心理中心工作台</h2>
+        </div>
+        <button id="adminRefresh" type="button">刷新</button>
+      </header>
+
+      <section id="adminStats" class="stats-grid"></section>
+
+      <section class="risk-filter-bar">
+        <label>
+          <span>处置状态</span>
+          <select id="ticketStatusFilter">
+            <option value="">全部状态</option>
+            <option value="!RESOLVED">未关闭</option>
+            <option value="PENDING">PENDING</option>
+            <option value="IN_PROGRESS">IN_PROGRESS</option>
+            <option value="OPEN">OPEN</option>
+            <option value="ACKNOWLEDGED">ACKNOWLEDGED</option>
+            <option value="CONTACTED">CONTACTED</option>
+            <option value="UNREACHABLE">UNREACHABLE</option>
+            <option value="REFERRED">REFERRED</option>
+            <option value="ESCALATED">ESCALATED</option>
+            <option value="CLOSED">CLOSED</option>
+            <option value="RESOLVED">RESOLVED</option>
+          </select>
+        </label>
+        <label>
+          <span>风险等级</span>
+          <select id="ticketRiskFilter">
+            <option value="">全部风险</option>
+            <option value="HIGH">HIGH</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="LOW">LOW</option>
+          </select>
+        </label>
+        <label>
+          <span>负责人</span>
+          <select id="ticketAssigneeFilter">
+            <option value="">全部负责人</option>
+          </select>
+        </label>
+        <label class="wide-filter">
+          <span>关键词</span>
+          <input id="ticketSearchFilter" type="search" placeholder="学生、摘要、备注">
+        </label>
+        <button id="ticketFilterReset" type="button">重置</button>
+      </section>
+
+      <section class="admin-layout">
+        <section class="admin-column priority-column">
+          <div class="column-head">
+            <h3>风险队列</h3>
+            <span id="queueCount">0</span>
+          </div>
+          <div id="adminReportRows" class="record-list"></div>
+        </section>
+
+        <section class="admin-column">
+          <div class="column-head">
+            <h3>数据闭环</h3>
+          </div>
+          <div id="excelRows" class="record-list"></div>
+        </section>
+
+        <section class="admin-column">
+          <div class="column-head">
+            <h3>预警送达</h3>
+          </div>
+          <div id="emailRows" class="record-list"></div>
+        </section>
+      </section>
+
+      <form id="knowledgeUploadForm" class="knowledge-bar">
+        <div>
+          <p class="kicker">Knowledge Base</p>
+          <strong id="knowledgeUploadState">上传 PDF / Markdown / TXT</strong>
+        </div>
+        <label class="upload-button">
+          <input id="knowledgeFile" type="file" accept=".pdf,.md,.markdown,.txt,application/pdf,text/markdown,text/plain">
+          <span>选择文件</span>
+        </label>
+        <button type="submit">入库</button>
+      </form>
+      <div id="knowledgeSources" class="knowledge-sources"></div>
+    </section>
+    </div>
+  </main>
+
+  <section id="detailOverlay" class="detail-overlay" hidden>
+    <article class="detail-drawer">
+      <header>
+        <div>
+          <p id="detailKicker" class="kicker">详情</p>
+          <h2 id="detailTitle">记录</h2>
+          <p id="detailMeta"></p>
+        </div>
+        <button id="closeDetail" type="button">关闭</button>
+      </header>
+      <div id="detailBody" class="detail-body"></div>
+    </article>
+  </section>
+
+  <script src="app.js?v=20260630-rendered-state-rebuild"></script>
+</body>
+</html>

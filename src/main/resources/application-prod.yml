@@ -1,0 +1,18 @@
+spring:
+  h2:
+    console:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+multimodal-agent:
+  security:
+    seed-demo-users: false
+  mcp:
+    server:
+      enabled: ${MCP_SERVER_ENABLED:false}
+      auth-token: ${MCP_SERVER_TOKEN:}
+  multimodal:
+    whisper:
+      demo-filename-signals: false
