@@ -41,25 +41,37 @@ It is not only a chatbot. It is designed as a workflow-oriented AI support platf
 
 <table>
   <tr>
-    <td width="50%">
-      <h3>学生端 Student Side</h3>
-      <ul>
-        <li>SSE 流式心理支持对话</li>
-        <li>最近 10 条历史会话恢复</li>
-        <li>情绪日记与 7/14/30 天趋势</li>
-        <li>支持目标与小任务体系</li>
-        <li>图片/语音/视频多模态入口</li>
-      </ul>
+    <td width="33%">
+      <h3>持续支持闭环</h3>
+      <p><b>From chat to continuous care</b></p>
+      <p>学生端不止聊天，还包含历史会话、情绪日记、支持目标、小任务和趋势追踪，让一次性对话变成持续支持。</p>
     </td>
-    <td width="50%">
-      <h3>管理员端 Admin Side</h3>
-      <ul>
-        <li>风险看板与趋势分析</li>
-        <li>风险工单状态机与 SLA 提醒</li>
-        <li>联系记录、升级记录、干预时间线</li>
-        <li>学生支持档案与管理员备注</li>
-        <li>导出与审计日志</li>
-      </ul>
+    <td width="33%">
+      <h3>危机干预流程</h3>
+      <p><b>Risk workflow, not just risk labels</b></p>
+      <p>高风险识别后进入工单、SLA、联系记录、升级、转介、结案和审计链路，支持真实后台处置。</p>
+    </td>
+    <td width="33%">
+      <h3>可信 RAG 与多模态</h3>
+      <p><b>Grounded and explainable AI</b></p>
+      <p>回答带知识引用、分类和反馈；风险判断展示文本、语音、视觉置信度，降低黑箱感。</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%">
+      <h3>实时语音架构</h3>
+      <p><b>Voice-ready companion system</b></p>
+      <p>预留 LiveKit 控制通道、Doubao ASR/TTS、打断和会话总结能力，让心理陪伴从文字扩展到语音。</p>
+    </td>
+    <td width="33%">
+      <h3>企业级后台视角</h3>
+      <p><b>Operational dashboard</b></p>
+      <p>管理员可查看风险趋势、学生画像、知识库运营、审计日志和导出结果，适合正式场景演示。</p>
+    </td>
+    <td width="33%">
+      <h3>可部署工程闭环</h3>
+      <p><b>Deployable engineering stack</b></p>
+      <p>Docker Compose 集成 MySQL、Redis、Chroma、Ollama、Mailpit，支持 GPU 本地推理和外部模型切换。</p>
     </td>
   </tr>
 </table>
@@ -84,77 +96,65 @@ It is not only a chatbot. It is designed as a workflow-oriented AI support platf
 ## 系统架构 | Architecture
 
 ```mermaid
-flowchart TB
-    subgraph Client["Frontend / Web UI"]
-        Student["Student Support Workspace"]
-        Admin["Admin Case Workspace"]
-        VoiceUI["Realtime Voice Panel"]
+flowchart LR
+    classDef user fill:#ecfdf5,stroke:#0f766e,color:#064e3b,stroke-width:1.5px
+    classDef api fill:#eff6ff,stroke:#2563eb,color:#1e3a8a,stroke-width:1.5px
+    classDef ai fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95,stroke-width:1.5px
+    classDef ops fill:#fff7ed,stroke:#ea580c,color:#7c2d12,stroke-width:1.5px
+    classDef data fill:#f8fafc,stroke:#475569,color:#0f172a,stroke-width:1.5px
+
+    subgraph U["Experience Layer / 体验层"]
+        Student["Student Workspace<br/>Chat · Mood · Tasks · History"]:::user
+        Admin["Admin Workspace<br/>Risk · Cases · Knowledge · Audit"]:::user
+        VoicePanel["Voice Panel<br/>LiveKit · Interrupt · Summary"]:::user
     end
 
-    subgraph API["Spring Boot WebFlux API"]
-        Chat["ChatController / SSE Stream"]
-        Support["StudentSupportController"]
-        Reports["Report & Risk APIs"]
-        Voice["VoiceController"]
-        KnowledgeAdmin["KnowledgeController"]
+    subgraph B["Application Layer / 应用层"]
+        ChatAPI["Chat & Multimodal API<br/>SSE Streaming"]:::api
+        SupportAPI["Support API<br/>Mood · Goals · Tiny Tasks"]:::api
+        AdminAPI["Admin API<br/>Tickets · Profiles · Export"]:::api
+        VoiceAPI["Voice API<br/>Control Channel"]:::api
+        KnowledgeAPI["Knowledge Ops API<br/>Version · Search Test"]:::api
     end
 
-    subgraph Intelligence["AI & Reasoning Layer"]
-        Router["Intent Router"]
-        LLM["Spring AI: Ollama / OpenAI"]
-        RAG["Agentic RAG"]
-        Risk["Risk Assessment"]
-        Fusion["Multimodal Fusion"]
+    subgraph I["Intelligence Layer / 智能层"]
+        Router["Intent Router<br/>CHAT · CONSULT · RISK"]:::ai
+        Rag["Agentic RAG<br/>Citation · Category · Evidence"]:::ai
+        Llm["LLM Runtime<br/>Ollama Qwen2.5 / OpenAI"]:::ai
+        Risk["Risk Engine<br/>Text · Audio · Visual Confidence"]:::ai
+        VoiceAI["Voice AI<br/>Doubao ASR · Doubao/MiniMax TTS"]:::ai
     end
 
-    subgraph Data["Data & Tools"]
-        DB["MySQL / H2"]
-        Redis["Redis"]
-        Chroma["Chroma Vector DB"]
-        Mailpit["Mailpit / SMTP"]
-        Excel["Excel / CSV Export"]
+    subgraph D["Data & Integration Layer / 数据与集成层"]
+        MySQL["MySQL / H2<br/>Users · Sessions · Tickets"]:::data
+        Redis["Redis<br/>Runtime State"]:::data
+        Chroma["Chroma<br/>Vector Retrieval"]:::data
+        Mail["Mailpit / SMTP<br/>Notifications"]:::ops
+        Files["CSV / Excel<br/>Export & Reports"]:::ops
     end
 
-    subgraph VoiceStack["Voice Stack"]
-        LiveKit["LiveKit Room Control"]
-        ASR["Doubao ASR"]
-        TTS["Doubao / MiniMax TTS"]
-    end
+    Student --> ChatAPI
+    Student --> SupportAPI
+    Admin --> AdminAPI
+    Admin --> KnowledgeAPI
+    VoicePanel --> VoiceAPI
 
-    Student --> Chat
-    Student --> Support
-    Admin --> Reports
-    Admin --> KnowledgeAdmin
-    VoiceUI --> Voice
+    ChatAPI --> Router
+    Router --> Llm
+    Router --> Rag
+    ChatAPI --> Risk
+    VoiceAPI --> VoiceAI
+    KnowledgeAPI --> Rag
 
-    Chat --> Router --> LLM
-    Router --> RAG --> Chroma
-    Chat --> Risk --> Reports
-    Chat --> Fusion
-    Support --> DB
-    Reports --> DB
-    KnowledgeAdmin --> DB
-    KnowledgeAdmin --> Chroma
-    Voice --> LiveKit
-    Voice --> ASR
-    Voice --> TTS
-    Reports --> Mailpit
-    Reports --> Excel
-    API --> Redis
+    Rag --> Chroma
+    Llm --> MySQL
+    Risk --> AdminAPI
+    SupportAPI --> MySQL
+    AdminAPI --> MySQL
+    AdminAPI --> Mail
+    AdminAPI --> Files
+    B --> Redis
 ```
-
----
-
-## 页面展示 | Visual Overview
-
-> 当前仓库提供主视觉图。建议后续把真实运行截图放入 `docs/assets/`，让 README 更像完整产品展示页。
-
-| Workspace | Preview |
-| --- | --- |
-| Student Support 学生支持 | Chat, mood journal, tasks, goals, history sessions |
-| Risk Dashboard 风险看板 | Risk queue, filters, SLA state, handling records |
-| Knowledge Ops 知识运营 | Source list, category/version management, retrieval testing |
-| Student Profile 个案档案 | Recent chats, mood trend, task completion, notes, tickets |
 
 ---
 
